@@ -48,31 +48,67 @@ export const createQRCode = async (): Promise<QRCodeResponse> => {
 
 // 查询二维码状态（转换后端 code_status 为前端 status 字符串）
 export const checkQRCodeStatus = async (qrId: string): Promise<QRCodeStatusResponse> => {
-  const raw: QRCodeStatusRawResponse = await client.get(`/api/auth/qrcode/status`, { params: { qr_id: qrId } });
+  try {
+    const raw: QRCodeStatusRawResponse = await client.get(`/api/auth/qrcode/status`, { params: { qr_id: qrId } });
 
-  // 将 code_status 数字转换为前端期望的字符串状态
-  let status: string;
-  switch (raw.code_status) {
-    case 0:
-      status = 'waiting';
-      break;
-    case 1:
-      status = 'scanned';
-      break;
-    case 2:
-      status = 'confirmed';
-      break;
-    default:
-      status = 'expired';
-      break;
+    // 调试日志
+    console.log('[QRCode Status] Raw response:', raw);
+
+    // 检查是否有错误
+    if (raw.error) {
+      console.error('[QRCode Status] Error:', raw.error);
+      return {
+        status: 'expired',
+        error: raw.error,
+      };
+    }
+
+    // 将 code_status 数字转换为前端期望的字符串状态
+    let status: string;
+    const codeStatus = raw.code_status;
+
+    // 确保 code_status 是有效数字
+    if (typeof codeStatus !== 'number') {
+      console.warn('[QRCode Status] Invalid code_status:', codeStatus);
+      return {
+        status: 'waiting',  // 默认继续等待，而不是过期
+        error: undefined,
+      };
+    }
+
+    switch (codeStatus) {
+      case 0:
+        status = 'waiting';
+        break;
+      case 1:
+        status = 'scanned';
+        break;
+      case 2:
+        status = 'confirmed';
+        break;
+      case -1:
+        status = 'expired';
+        break;
+      default:
+        console.warn('[QRCode Status] Unknown code_status:', codeStatus);
+        status = 'waiting';  // 未知状态继续等待
+        break;
+    }
+
+    return {
+      status,
+      nickname: raw.login_info?.nickname,
+      user_id: raw.login_info?.user_id,
+      error: raw.error,
+    };
+  } catch (error) {
+    console.error('[QRCode Status] Request failed:', error);
+    // 请求失败时返回 waiting 而不是 expired，让用户可以继续轮询
+    return {
+      status: 'waiting',
+      error: String(error),
+    };
   }
-
-  return {
-    status,
-    nickname: raw.login_info?.nickname,
-    user_id: raw.login_info?.user_id,
-    error: raw.error,
-  };
 };
 
 // 获取当前用户信息
