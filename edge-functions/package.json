@@ -1,0 +1,12 @@
+{
+  "name": "xhs-frontend",
+  "version": "1.0.0",
+  "description": "小红书工具箱前端 - 阿里云 ESA 边缘函数配置",
+  "main": "api-proxy.js",
+  "scripts": {
+    "build": "npm run build --prefix ..",
+    "deploy": "aliyun esa deploy"
+  },
+  "author": "",
+  "license": "MIT"
+}
