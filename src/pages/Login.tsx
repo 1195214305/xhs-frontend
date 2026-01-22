@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { QRCode, Button, Spin, message, Card, Typography, Space } from 'antd';
 import { ReloadOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { createQRCode, checkQRCodeStatus, getCurrentUser, initGuest } from '../api/auth';
+import { createQRCode, checkQRCodeStatus, initGuest } from '../api/auth';
 import type { UserInfo } from '../types';
 
 const { Title, Text } = Typography;

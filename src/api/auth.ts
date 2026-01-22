@@ -1,5 +1,5 @@
 import client from './client';
-import type { QRCodeStatus, UserInfo } from '../types';
+import type { UserInfo } from '../types';
 
 // 后端响应格式
 interface QRCodeResponse {
